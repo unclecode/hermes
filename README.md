@@ -11,6 +11,8 @@ Hermes, the messenger of the gods, brings you lightning-fast video transcription
 
 ## 🏎️ Performance Comparison
 
+![Hermes Benchmark Results](https://raw.githubusercontent.com/unclecode/hermes/main/assets/whisper-benchmark.png)
+
 For a 393-second video:
 
 | Provider | Model | Time (seconds) |
