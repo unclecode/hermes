@@ -24,6 +24,8 @@ For a 393-second video:
 
 ## 🛠️ Usage
 
+#### IMPORTANT: Before you begin make sure your Groq api key is set in the environment variable `GROQ_API_KEY`. In case of OpenAI, set the environment variable `OPENAI_API_KEY`.
+
 ```bash
 ./hermes.sh <video-file> [provider: mlx | groq | openai] [model] [response_format] [additional-mlx-whisper-arguments]
 ```
