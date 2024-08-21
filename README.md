@@ -30,9 +30,14 @@ For a 393-second video:
 
 ### Examples:
 
-1. Basic usage with MLX (default):
+0. Basic usage with MLX (default):
    ```bash
    ./hermes.sh input.mp4
+   ```
+
+1. Basic usage with MLX with different model:
+   ```bash
+   ./hermes.sh input.mp4 --model distil-whisper-large-v3
    ```
 
 2. Using Groq with default model:
@@ -40,10 +45,57 @@ For a 393-second video:
    ./hermes.sh input.mp4 groq
    ```
 
-3. Using OpenAI with srt output:
+3. Using Groq with different model:
    ```bash
-   ./hermes.sh input.mp4 openai whisper-1 srt
+   ./hermes.sh input.mp4 groq --model whisper-large-v3
    ```
+
+4. Using OpenAI with srt output:
+   ```bash
+   ./hermes.sh input.mp4 openai --model whisper-1 srt
+   ```
+
+## 📊 Running Benchmarks
+
+Want to see how Hermes performs with different providers and models? Use our handy benchmark script to test transcription speeds on your own videos!
+
+### Usage
+
+```bash
+./benchmark.sh <video-file>
+```
+
+This script will run the transcription process using all supported providers and models, then generate a performance report.
+
+### Example
+
+```bash
+./benchmark.sh my_video.mp4
+```
+
+### What It Does
+
+1. Runs transcription using:
+   - MLX Whisper (distil-whisper-large-v3)
+   - Groq (distil-whisper-large-v3-en)
+   - Groq (whisper-large-v3)
+   - OpenAI Whisper (whisper-1)
+2. Measures the time taken for each transcription
+3. Generates a report comparing the performance of each provider and model
+
+### Sample Output
+
+```
+Benchmark Report for my_video.mp4
+====================================
+Video duration: 393.206689 seconds
+MLX Whisper (distil-whisper-large-v3): 11 seconds
+Groq (distil-whisper-large-v3-en): 1 seconds
+Groq (whisper-large-v3): 2 seconds
+OpenAI Whisper (whisper-1): 21 seconds
+```
+
+Run this benchmark on your own videos to see the impressive speed of Groq's distil-whisper model in action!
 
 ## 🌟 Why Hermes?
 
