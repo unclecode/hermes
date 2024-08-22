@@ -10,6 +10,41 @@ Hermes, the messenger of the gods, brings you lightning-fast video transcription
 - **Flexible**: Support for various models and output formats
 - **Easy to Use**: Simple command-line interface for quick transcriptions
 
+## 📦 Installation
+
+Before using the Hermes Video Transcription Script, you need to install the required dependencies:
+
+1. Ensure you have Python 3.7 or later installed on your system.
+
+2. Clone the repository:
+   ```
+   git clone https://github.com/unclecode/hermes.git
+   cd hermes
+   ```
+
+3. Install the required Python packages:
+   ```
+   pip install -r requirements.txt
+   ```
+
+4. Install FFmpeg:
+   - On macOS (using Homebrew):
+     ```
+     brew install ffmpeg
+     ```
+   - On Ubuntu or Debian:
+     ```
+     sudo apt-get update
+     sudo apt-get install ffmpeg
+     ```
+   - For other operating systems, please refer to the [official FFmpeg documentation](https://ffmpeg.org/download.html).
+
+5. Set up your API keys:
+   - For Groq: `export GROQ_API_KEY=your_groq_api_key`
+   - For OpenAI: `export OPENAI_API_KEY=your_openai_api_key`
+
+Now you're ready to use the Hermes Video Transcription Script!
+
 ## 🏎️ Performance Comparison
 
 ![Hermes Benchmark Results](https://raw.githubusercontent.com/unclecode/hermes/main/assets/whisper-benchmark.png)

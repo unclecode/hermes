@@ -1,0 +1,5 @@
+yt-dlp
+ffmpeg-python
+openai
+groq
+mlx-whisper
