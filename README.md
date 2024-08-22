@@ -4,7 +4,8 @@ Hermes, the messenger of the gods, brings you lightning-fast video transcription
 
 ## 🚀 Features
 
-- **Multi-Provider Support**: Choose from MLX Whisper, Groq, or OpenAI for transcription
+- **Multi-Provider Support**: Choose from Groq (default), MLX Whisper, or OpenAI for transcription
+- **YouTube Support**: Easily transcribe YouTube videos by simply passing the URL
 - **Blazing Fast**: Transcribe a 393-second video in just 1 second with Groq's distil-whisper model!
 - **Flexible**: Support for various models and output formats
 - **Easy to Use**: Simple command-line interface for quick transcriptions
@@ -24,37 +25,37 @@ For a 393-second video:
 
 ## 🛠️ Usage
 
-#### IMPORTANT: Before you begin make sure your Groq api key is set in the environment variable `GROQ_API_KEY`. In case of OpenAI, set the environment variable `OPENAI_API_KEY`.
+#### IMPORTANT: Before you begin, make sure your Groq API key is set in the environment variable `GROQ_API_KEY`. For OpenAI, set the environment variable `OPENAI_API_KEY`.
 
 ```bash
-./hermes.sh <video-file> [provider: mlx | groq | openai] [model] [response_format] [additional-mlx-whisper-arguments]
+./hermes.sh <video-file-or-youtube-url> [provider: mlx | groq | openai] [response_format] [model] [additional-mlx-whisper-arguments]
 ```
 
 ### Examples:
 
-0. Basic usage with MLX (default):
+1. Basic usage with Groq (default):
    ```bash
    ./hermes.sh input.mp4
    ```
 
-1. Basic usage with MLX with different model:
+2. Transcribing a YouTube video:
    ```bash
-   ./hermes.sh input.mp4 --model distil-whisper-large-v3
+   ./hermes.sh https://www.youtube.com/watch?v=dQw4w9WgXcQ
    ```
 
-2. Using Groq with default model:
+3. Using MLX Whisper:
    ```bash
-   ./hermes.sh input.mp4 groq
+   ./hermes.sh input.mp4 mlx
    ```
 
-3. Using Groq with different model:
+4. Using Groq with a different model:
    ```bash
-   ./hermes.sh input.mp4 groq --model whisper-large-v3
+   ./hermes.sh input.mp4 groq text whisper-large-v3
    ```
 
-4. Using OpenAI with srt output:
+5. Using OpenAI with srt output:
    ```bash
-   ./hermes.sh input.mp4 openai --model whisper-1 srt
+   ./hermes.sh input.mp4 openai srt whisper-1
    ```
 
 ## 📊 Running Benchmarks
@@ -64,7 +65,7 @@ Want to see how Hermes performs with different providers and models? Use our han
 ### Usage
 
 ```bash
-./benchmark.sh <video-file>
+./benchmark.sh <video-file-or-youtube-url>
 ```
 
 This script will run the transcription process using all supported providers and models, then generate a performance report.
@@ -75,12 +76,18 @@ This script will run the transcription process using all supported providers and
 ./benchmark.sh my_video.mp4
 ```
 
+or
+
+```bash
+./benchmark.sh https://www.youtube.com/watch?v=dQw4w9WgXcQ
+```
+
 ### What It Does
 
 1. Runs transcription using:
-   - MLX Whisper (distil-whisper-large-v3)
    - Groq (distil-whisper-large-v3-en)
    - Groq (whisper-large-v3)
+   - MLX Whisper (distil-whisper-large-v3)
    - OpenAI Whisper (whisper-1)
 2. Measures the time taken for each transcription
 3. Generates a report comparing the performance of each provider and model
@@ -91,18 +98,19 @@ This script will run the transcription process using all supported providers and
 Benchmark Report for my_video.mp4
 ====================================
 Video duration: 393.206689 seconds
-MLX Whisper (distil-whisper-large-v3): 11 seconds
 Groq (distil-whisper-large-v3-en): 1 seconds
 Groq (whisper-large-v3): 2 seconds
+MLX Whisper (distil-whisper-large-v3): 11 seconds
 OpenAI Whisper (whisper-1): 21 seconds
 ```
 
-Run this benchmark on your own videos to see the impressive speed of Groq's distil-whisper model in action!
+Run this benchmark on your own videos or YouTube links to see the impressive speed of Groq's distil-whisper model in action!
 
 ## 🌟 Why Hermes?
 
 - **Speed**: Groq's distil-whisper model transcribes 393 seconds of audio in just 1 second!
 - **Flexibility**: Choose the provider that best suits your needs
+- **YouTube Support**: Easily transcribe YouTube videos without downloading them manually
 - **Local Option**: Use MLX Whisper for fast, local transcription on Mac or MPS systems
 - **Cloud Power**: Leverage Groq's LPU for the fastest cloud-based transcription
 
