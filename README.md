@@ -40,7 +40,7 @@ For a 393-second video:
 
 2. Transcribing a YouTube video:
    ```bash
-   ./hermes.sh https://www.youtube.com/watch?v=dQw4w9WgXcQ
+   ./hermes.sh https://www.youtube.com/watch?v=FJVFXsNzYZQ
    ```
 
 3. Using MLX Whisper:
