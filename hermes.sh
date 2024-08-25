@@ -29,7 +29,7 @@ show_help() {
     printf "\n  Using OpenAI with srt output:\n"
     printf "    $0 input.mp4 openai srt whisper-1\n"
     printf "\n  Processing a YouTube video:\n"
-    printf "    $0 https://www.youtube.com/watch?v=dQw4w9WgXcQ\n"
+    printf "    $0 https://www.youtube.com/watch?v=v=PNulbFECY-I\n"
 }
 
 check_dependencies() {

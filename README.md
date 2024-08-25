@@ -1,49 +1,96 @@
-# Hermes Video Transcription Script 🎥➡️📝
+# Hermes v0.1.0: Lightning-Fast Video Transcription 🎥➡️📝
 
-Hermes, the messenger of the gods, brings you lightning-fast video transcription! This script harnesses the power of cutting-edge AI to convert your videos into text with unprecedented speed and accuracy.
+Hermes, the messenger of the gods, now brings you ultra-fast video transcription powered by cutting-edge AI! This Python library and CLI tool harnesses the speed of Groq and the flexibility of multiple providers to convert your videos into text with unprecedented efficiency.
 
 ## 🚀 Features
 
+- **Blazing Fast**: Transcribe a 393-second video in just 1 second with Groq's distil-whisper model!
 - **Multi-Provider Support**: Choose from Groq (default), MLX Whisper, or OpenAI for transcription
 - **YouTube Support**: Easily transcribe YouTube videos by simply passing the URL
-- **Blazing Fast**: Transcribe a 393-second video in just 1 second with Groq's distil-whisper model!
 - **Flexible**: Support for various models and output formats
-- **Easy to Use**: Simple command-line interface for quick transcriptions
+- **Python Library & CLI**: Use Hermes in your Python projects or directly from the command line
+- **LLM Processing**: Process the transcription with an LLM for further analysis
 
 ## 📦 Installation
 
-Before using the Hermes Video Transcription Script, you need to install the required dependencies:
+Install Hermes directly from GitHub using pip:
 
-1. Ensure you have Python 3.7 or later installed on your system.
+```
+pip install git+https://github.com/unclecode/hermes.git
+```
 
-2. Clone the repository:
-   ```
-   git clone https://github.com/unclecode/hermes.git
-   cd hermes
-   ```
+## 🛠️ Usage
 
-3. Install the required Python packages:
-   ```
-   pip install -r requirements.txt
-   ```
+### Python Library
 
-4. Install FFmpeg:
-   - On macOS (using Homebrew):
-     ```
-     brew install ffmpeg
-     ```
-   - On Ubuntu or Debian:
-     ```
-     sudo apt-get update
-     sudo apt-get install ffmpeg
-     ```
-   - For other operating systems, please refer to the [official FFmpeg documentation](https://ffmpeg.org/download.html).
+1. Basic transcription:
 
-5. Set up your API keys:
-   - For Groq: `export GROQ_API_KEY=your_groq_api_key`
-   - For OpenAI: `export OPENAI_API_KEY=your_openai_api_key`
+```
+from hermes import transcribe
 
-Now you're ready to use the Hermes Video Transcription Script!
+result = transcribe('path/to/your/video.mp4', provider='groq')
+print(result['transcription'])
+```
+
+2. Transcribe a YouTube video:
+
+```
+result = transcribe('https://www.youtube.com/watch?v=v=PNulbFECY-I', provider='groq')
+print(result['transcription'])
+```
+
+3. Use a different model:
+
+```
+result = transcribe('path/to/your/video.mp4', provider='groq', model='whisper-large-v3')
+print(result['transcription'])
+```
+
+4. Get JSON output:
+
+```
+result = transcribe('path/to/your/video.mp4', provider='groq', response_format='json')
+print(result['transcription'])
+```
+
+5. Process with LLM:
+
+```
+result = transcribe('path/to/your/video.mp4', provider='groq', llm_prompt="Summarize this transcription in 3 bullet points")
+print(result['llm_processed'])
+```
+
+### Command Line Interface
+
+1. Basic usage:
+
+```
+hermes path/to/your/video.mp4 -p groq
+```
+
+2. Transcribe a YouTube video:
+
+```
+hermes https://www.youtube.com/watch?v=v=PNulbFECY-I -p groq
+```
+
+3. Use a different model:
+
+```
+hermes path/to/your/video.mp4 -p groq -m whisper-large-v3
+```
+
+4. Get JSON output:
+
+```
+hermes path/to/your/video.mp4 -p groq --response_format json
+```
+
+5. Process with LLM:
+
+```
+hermes path/to/your/video.mp4 -p groq --llm_prompt "Summarize this transcription in 3 bullet points"
+```
 
 ## 🏎️ Performance Comparison
 
@@ -58,94 +105,28 @@ For a 393-second video:
 | MLX Whisper | distil-whisper-large-v3 | 11 |
 | OpenAI | whisper-1 | 21 |
 
-## 🛠️ Usage
-
-#### IMPORTANT: Before you begin, make sure your Groq API key is set in the environment variable `GROQ_API_KEY`. For OpenAI, set the environment variable `OPENAI_API_KEY`.
-
-```bash
-./hermes.sh <video-file-or-youtube-url> [provider: mlx | groq | openai] [response_format] [model] [additional-mlx-whisper-arguments]
-```
-
-### Examples:
-
-1. Basic usage with Groq (default):
-   ```bash
-   ./hermes.sh input.mp4
-   ```
-
-2. Transcribing a YouTube video:
-   ```bash
-   ./hermes.sh https://www.youtube.com/watch?v=FJVFXsNzYZQ
-   ```
-
-3. Using MLX Whisper:
-   ```bash
-   ./hermes.sh input.mp4 mlx
-   ```
-
-4. Using Groq with a different model:
-   ```bash
-   ./hermes.sh input.mp4 groq text whisper-large-v3
-   ```
-
-5. Using OpenAI with srt output:
-   ```bash
-   ./hermes.sh input.mp4 openai srt whisper-1
-   ```
-
 ## 📊 Running Benchmarks
 
-Want to see how Hermes performs with different providers and models? Use our handy benchmark script to test transcription speeds on your own videos!
+Test Hermes performance with different providers and models:
 
-### Usage
-
-```bash
-./benchmark.sh <video-file-or-youtube-url>
 ```
-
-This script will run the transcription process using all supported providers and models, then generate a performance report.
-
-### Example
-
-```bash
-./benchmark.sh my_video.mp4
+python -m hermes.benchmark path/to/your/video.mp4
 ```
 
 or
 
-```bash
-./benchmark.sh https://www.youtube.com/watch?v=dQw4w9WgXcQ
+```
+python -m hermes.benchmark https://www.youtube.com/watch?v=v=PNulbFECY-I
 ```
 
-### What It Does
-
-1. Runs transcription using:
-   - Groq (distil-whisper-large-v3-en)
-   - Groq (whisper-large-v3)
-   - MLX Whisper (distil-whisper-large-v3)
-   - OpenAI Whisper (whisper-1)
-2. Measures the time taken for each transcription
-3. Generates a report comparing the performance of each provider and model
-
-### Sample Output
-
-```
-Benchmark Report for my_video.mp4
-====================================
-Video duration: 393.206689 seconds
-Groq (distil-whisper-large-v3-en): 1 seconds
-Groq (whisper-large-v3): 2 seconds
-MLX Whisper (distil-whisper-large-v3): 11 seconds
-OpenAI Whisper (whisper-1): 21 seconds
-```
-
-Run this benchmark on your own videos or YouTube links to see the impressive speed of Groq's distil-whisper model in action!
+This will generate a performance report for all supported providers and models.
 
 ## 🌟 Why Hermes?
 
-- **Speed**: Groq's distil-whisper model transcribes 393 seconds of audio in just 1 second!
+- **Unmatched Speed**: Groq's distil-whisper model transcribes 393 seconds of audio in just 1 second!
 - **Flexibility**: Choose the provider that best suits your needs
-- **YouTube Support**: Easily transcribe YouTube videos without downloading them manually
+- **Easy Integration**: Use as a Python library or CLI tool
+- **YouTube Support**: Transcribe YouTube videos without manual downloads
 - **Local Option**: Use MLX Whisper for fast, local transcription on Mac or MPS systems
 - **Cloud Power**: Leverage Groq's LPU for the fastest cloud-based transcription
 
@@ -155,4 +136,4 @@ Huge shoutout to the @GroqInc team for their incredible distil-whisper model, ma
 
 ## 🎉 Final Thoughts
 
-We're living in amazing times! Whether you need the speed of Groq, the convenience of OpenAI, or the local power of MLX Whisper, Hermes has got you covered. Happy transcribing!
+We're living in amazing times! Whether you need the lightning speed of Groq, the convenience of OpenAI, or the local power of MLX Whisper, Hermes has got you covered. Happy transcribing!

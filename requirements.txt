@@ -1,5 +1,12 @@
-yt-dlp
-ffmpeg-python
-openai
-groq
-mlx-whisper
+yt-dlp>=2024.8.6
+ffmpeg-python>=0.2.0
+openai>=1.42.0
+groq>=0.9.0
+mlx-whisper>=0.3.0
+pydub>=0.25.1
+pyperclip>=1.9.0
+sounddevice>=0.5.0
+numpy>=2.0.1
+requests>=2.32.3
+PyYAML>=6.0.2
+litellm>=1.44.5
