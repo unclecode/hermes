@@ -1,16 +1,15 @@
 from setuptools import setup, find_packages
 from setuptools.command.install import install
 import os
-import sys
 import yaml
 from pathlib import Path
 
 # Read requirements.txt
 with open("requirements.txt") as f:
-    requirements = f.read().splitlines()
+    requirements = [req for req in f.read().splitlines() if not req.startswith('mlx-')]
 
-# Remove MLX-specific requirements for the MLX-free version
-requirements_without_mlx = [req for req in requirements if not req.startswith('mlx-')]
+# MLX-specific requirements
+mlx_requirements = ["mlx-whisper>=0.3.0"]
 
 # Define the default configuration
 DEFAULT_CONFIG = {
@@ -46,19 +45,14 @@ class PostInstallCommand(install):
         install.run(self)
         post_install()
 
-# Determine if we're installing the MLX-free version
-is_mlx_free = '--without-mlx' in sys.argv
-if is_mlx_free:
-    sys.argv.remove('--without-mlx')
-    install_requires = requirements_without_mlx
-else:
-    install_requires = requirements
-
 setup(
     name="hermes",
     version="0.1.0",
     packages=find_packages(),
-    install_requires=install_requires,
+    install_requires=requirements,
+    extras_require={
+        "mlx": mlx_requirements,
+    },
     entry_points={
         "console_scripts": [
             "hermes=hermes.cli:main",
