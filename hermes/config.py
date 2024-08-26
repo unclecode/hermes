@@ -6,12 +6,12 @@ DEFAULT_CONFIG = {
     'llm': {
         'provider': 'groq',
         'model': 'llama-3.1-8b-instant',
-        'api_key': os.getenv('GROQ_API_KEY'),
+        'api_key': None,
     },
     'transcription': {
         'provider': 'groq',
         'model': 'distil-whisper-large-v3-en',
-        'api_key': os.getenv('GROQ_API_KEY'),
+        'api_key': None,
     },
     'cache': {
         'enabled': True,
@@ -31,11 +31,19 @@ def load_config() -> Dict[str, Any]:
     # Merge user config with default config
     config = {**DEFAULT_CONFIG, **user_config}
 
-    # Set API keys from environment variables if not in config
-    for provider in ['groq', 'openai']:
+    # Handle API keys
+    for service in ['llm', 'transcription']:
+        provider = config[service]['provider']
         env_var = f"{provider.upper()}_API_KEY"
-        if config['llm']['provider'] == provider and not config['llm'].get('api_key'):
-            config['llm']['api_key'] = os.getenv(env_var)
+        
+        # If API key is not in config, try to get it from environment
+        if not config[service]['api_key']:
+            config[service]['api_key'] = os.getenv(env_var)
+        
+        # If still no API key, raise an error
+        if not config[service]['api_key']:
+            raise ValueError(f"No API key found for {provider} in config or environment variable {env_var}. "
+                             f"Please set it in your config file or as an environment variable.")
 
     # Expand user directory for cache
     config['cache']['directory'] = os.path.expanduser(config['cache']['directory'])

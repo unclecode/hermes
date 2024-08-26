@@ -1,5 +1,8 @@
 # Hermes v0.1.0: Lightning-Fast Video Transcription 🎥➡️📝
 
+![Hermes Benchmark Results](https://raw.githubusercontent.com/unclecode/hermes/main/assets/whisper-benchmark.png)
+
+
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1taJvfZKgTxOtScaMR3qofj-ev_8nwn9P?usp=sharing)
 
 Hermes, the messenger of the gods, now brings you ultra-fast video transcription powered by cutting-edge AI! This Python library and CLI tool harnesses the speed of Groq and the flexibility of multiple providers to convert your videos into text with unprecedented efficiency.
@@ -48,6 +51,40 @@ pip install git+https://github.com/unclecode/hermes.git@main#egg=hermes[mlx]
 This installation includes all core features plus MLX Whisper support for local transcription.
 
 **Note:** MLX support is currently only available for Mac or MPS systems. If you're unsure which version to install, start with the standard installation.
+
+## ⚙️ Configuration
+
+Hermes uses a configuration file to manage its settings. On first run, Hermes will automatically create a `.hermes` folder in your home directory and populate it with a default `config.yml` file.
+
+You can customize Hermes' behavior by editing this file. Here's an example of what the `config.yml` might look like:
+
+```yaml
+# LLM (Language Model) settings
+llm:
+  provider: groq
+  model: llama-3.1-8b-instant
+  api_key: your_groq_api_key_here
+
+# Transcription settings
+transcription:
+  provider: groq
+  model: distil-whisper-large-v3-en
+  api_key: your_groq_api_key_here
+
+# Cache settings
+cache:
+  enabled: true
+  directory: ~/.hermes/cache
+
+# Source type for input (auto-detect by default)
+source_type: auto
+```
+
+The configuration file is located at `~/.hermes/config.yml`. You can edit this file to change providers, models, API keys, and other settings.
+
+**Note:** If you don't specify API keys in the config file, Hermes will look for them in your environment variables. For example, it will look for `GROQ_API_KEY` if you're using Groq as a provider.
+
+To override the configuration temporarily, you can also use command-line arguments when running Hermes. These will take precedence over the settings in the config file.
 
 ## 🛠️ Usage
 
