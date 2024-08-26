@@ -10,3 +10,4 @@ numpy>=2.0.1
 requests>=2.32.3
 PyYAML>=6.0.2
 litellm>=1.44.5
+PyAudio>=0.2.14

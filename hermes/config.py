@@ -6,11 +6,12 @@ DEFAULT_CONFIG = {
     'llm': {
         'provider': 'groq',
         'model': 'llama-3.1-8b-instant',
-        'api_key': None,
+        'api_key': os.getenv('GROQ_API_KEY'),
     },
     'transcription': {
         'provider': 'groq',
         'model': 'distil-whisper-large-v3-en',
+        'api_key': os.getenv('GROQ_API_KEY'),
     },
     'cache': {
         'enabled': True,
