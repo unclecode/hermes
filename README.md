@@ -1,20 +1,21 @@
-# Hermes v0.1.0: Lightning-Fast Video Transcription 🎥➡️📝
+# Hermes v0.1.0: Lightning-Fast Video Transcription and Commentary 🎥➡️📝🗣️
 
 ![Hermes Benchmark Results](https://raw.githubusercontent.com/unclecode/hermes/main/assets/whisper-benchmark.png)
 
-
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1taJvfZKgTxOtScaMR3qofj-ev_8nwn9P?usp=sharing)
 
-Hermes, the messenger of the gods, now brings you ultra-fast video transcription powered by cutting-edge AI! This Python library and CLI tool harnesses the speed of Groq and the flexibility of multiple providers to convert your videos into text with unprecedented efficiency.
+Hermes, the messenger of the gods, now brings you ultra-fast video transcription and intelligent commentary powered by cutting-edge AI! This Python library and CLI tool harnesses the speed of Groq and the flexibility of multiple providers to convert your videos into text and generate insightful commentaries with unprecedented efficiency.
 
 ## 🚀 Features
 
 - **Blazing Fast**: Transcribe a 393-second video in just 1 second with Groq's distil-whisper model!
 - **Multi-Provider Support**: Choose from Groq (default), MLX Whisper, or OpenAI for transcription
-- **YouTube Support**: Easily transcribe YouTube videos by simply passing the URL
+- **YouTube Support**: Easily transcribe and comment on YouTube videos by simply passing the URL
 - **Flexible**: Support for various models and output formats
 - **Python Library & CLI**: Use Hermes in your Python projects or directly from the command line
 - **LLM Processing**: Process the transcription with an LLM for further analysis
+- **Video Commentary**: Generate AI-powered commentary for your videos
+- **Textual Commentary**: Create detailed textual descriptions of video content
 
 ## 📦 Installation
 
@@ -78,6 +79,24 @@ cache:
 
 # Source type for input (auto-detect by default)
 source_type: auto
+
+# Commentary settings
+commentary:
+  provider: openai
+  model: gpt-4-vision-preview
+  api_key: your_openai_api_key_here
+
+# Text-to-Speech settings
+tts:
+  provider: elevenlabs
+  api_key: your_elevenlabs_api_key_here
+  voice_id: default_voice_id_here
+
+# Background music settings
+background_music:
+  default_path: path/to/default/background/music.mp3
+  volume: 0.2
+  fade_duration: 3
 ```
 
 The configuration file is located at `~/.hermes/config.yml`. You can edit this file to change providers, models, API keys, and other settings.
@@ -106,30 +125,27 @@ result = transcribe('https://www.youtube.com/watch?v=v=PNulbFECY-I', provider='g
 print(result['transcription'])
 ```
 
-3. Use a different model:
+3. Generate video commentary:
 
 ```python
-result = transcribe('path/to/your/video.mp4', provider='groq', model='whisper-large-v3')
-print(result['transcription'])
+from hermes.core import Hermes
+
+hermes = Hermes()
+result = hermes.generate_video_commentary('path/to/your/video.mp4', interval_type='total_snapshots', interval_value=6, target_size=224, video_output_size=(640,))
+print(result['commentary'])
+print(f"Final video path: {result['final_video_path']}")
 ```
 
-4. Get JSON output:
+4. Generate textual commentary:
 
 ```python
-result = transcribe('path/to/your/video.mp4', provider='groq', response_format='json')
-print(result['transcription'])
-```
-
-5. Process with LLM:
-
-```python
-result = transcribe('path/to/your/video.mp4', provider='groq', llm_prompt="Summarize this transcription in 3 bullet points")
-print(result['llm_processed'])
+result = hermes.generate_textual_commentary('path/to/your/video.mp4', llm_prompt='Summarize the key events in the video')
+print(result['textual_commentary'])
 ```
 
 ### Command Line Interface
 
-1. Basic usage:
+1. Basic transcription:
 
 ```
 hermes path/to/your/video.mp4 -p groq
@@ -141,22 +157,16 @@ hermes path/to/your/video.mp4 -p groq
 hermes https://www.youtube.com/watch?v=v=PNulbFECY-I -p groq
 ```
 
-3. Use a different model:
+3. Generate video commentary:
 
 ```
-hermes path/to/your/video.mp4 -p groq -m whisper-large-v3
+hermes path/to/your/video.mp4 --generate-commentary --interval-type total_snapshots --interval-value 6 --target-size 224 --video-output-size 640 480
 ```
 
-4. Get JSON output:
+4. Generate textual commentary:
 
 ```
-hermes path/to/your/video.mp4 -p groq --response_format json
-```
-
-5. Process with LLM:
-
-```
-hermes path/to/your/video.mp4 -p groq --llm_prompt "Summarize this transcription in 3 bullet points"
+hermes path/to/your/video.mp4 --textual-commentary --interval-type seconds --interval-value 10 --llm_prompt "Summarize the video content"
 ```
 
 ## 🏎️ Performance Comparison
@@ -193,9 +203,10 @@ This will generate a performance report for all supported providers and models.
 - **Unmatched Speed**: Groq's distil-whisper model transcribes 393 seconds of audio in just 1 second!
 - **Flexibility**: Choose the provider that best suits your needs
 - **Easy Integration**: Use as a Python library or CLI tool
-- **YouTube Support**: Transcribe YouTube videos without manual downloads
+- **YouTube Support**: Transcribe and comment on YouTube videos without manual downloads
 - **Local Option**: Use MLX Whisper for fast, local transcription on Mac or MPS systems
 - **Cloud Power**: Leverage Groq's LPU for the fastest cloud-based transcription
+- **Intelligent Commentary**: Generate insightful video and textual commentaries using advanced AI models
 
 ## 🙏 Acknowledgements
 
@@ -203,4 +214,4 @@ Huge shoutout to the @GroqInc team for their incredible distil-whisper model, ma
 
 ## 🎉 Final Thoughts
 
-We're living in amazing times! Whether you need the lightning speed of Groq, the convenience of OpenAI, or the local power of MLX Whisper, Hermes has got you covered. Happy transcribing!
+We're living in amazing times! Whether you need the lightning speed of Groq, the convenience of OpenAI, or the local power of MLX Whisper, Hermes has got you covered. With the addition of AI-powered video commentary, Hermes takes your video analysis to the next level. Happy transcribing and commenting!

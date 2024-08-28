@@ -5,7 +5,10 @@ from .strategies.provider import ProviderStrategy
 from .utils.cache import Cache
 from .utils.llm import LLMProcessor
 from .config import CONFIG
-
+from .commentary.video_commentary import VideoCommentary
+from .commentary.background_music import BackgroundMusic
+from .commentary.tts import TTSSettings
+import tempfile
 class Hermes:
     def __init__(self, config: Dict[str, Any] = None):
         self.config = config or CONFIG
@@ -64,6 +67,77 @@ class Hermes:
         provider_strategy = ProviderStrategy.get_strategy(config['transcription']['provider'])
         
         return cls(config)
+    
+    def generate_video_commentary(self, source: str, force: bool = False, bg_music_path: Optional[str] = None, **kwargs) -> Dict[str, Any]:
+        cache_key = f"video_commentary_{self.source_strategy.__class__.__name__}_{source.replace('/', '_')}"
+
+        if not force:
+            cached_result = self.cache.get(cache_key)
+            if cached_result:
+                return cached_result
+
+        video_data = self.source_strategy.get_video(source)
+        
+        commentary = VideoCommentary(base_folder=self.config['cache']['directory'])
+        
+        bg_music = None
+        if bg_music_path:
+            bg_music = BackgroundMusic(bg_music_path,
+                                    volume=self.config['background_music']['volume'],
+                                    fade_duration=self.config['background_music']['fade_duration'])
+        
+        tts_settings = TTSSettings(provider=self.config['tts']['provider'],
+                                voice_id=self.config['tts']['voice_id'])
+
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_video_file:
+            temp_video_file.write(video_data)
+            temp_video_path = temp_video_file.name
+
+        result = commentary.render(
+            video_path=temp_video_path,
+            background_music=bg_music,
+            tts_settings=tts_settings,
+            **kwargs
+        )
+
+        os.unlink(temp_video_path)  # Remove the temporary video file
+
+        final_result = {
+            "commentary": commentary.get_comments(),
+            "final_video_path": str(commentary.get_final_video_path())
+        }
+
+        self.cache.set(cache_key, final_result)
+        return final_result
+
+    def generate_textual_commentary(self, source: str, force: bool = False, llm_prompt: Optional[str] = None, **kwargs) -> Dict[str, Any]:
+        cache_key = f"textual_commentary_{self.source_strategy.__class__.__name__}_{source.replace('/', '_')}"
+
+        if not force:
+            cached_result = self.cache.get(cache_key)
+            if cached_result:
+                return cached_result
+
+        video_data = self.source_strategy.get_video(source)  # Now using get_video instead of get_audio
+        
+        commentary = VideoCommentary(base_folder=self.config['cache']['directory'])
+
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_video_file:
+            temp_video_file.write(video_data)
+            temp_video_path = temp_video_file.name
+
+        textual_commentary = commentary.generate_textual_commentary(video_path=temp_video_path, **kwargs)
+
+        os.unlink(temp_video_path)  # Remove the temporary video file
+
+        result = {"textual_commentary": textual_commentary}
+
+        if llm_prompt:
+            result["llm_processed"] = self.process_with_llm(textual_commentary, llm_prompt)
+
+        self.cache.set(cache_key, result)
+        return result
+
 
 def transcribe(source: str, provider: Optional[str] = None, force: bool = False, llm_prompt: Optional[str] = None, model: Optional[str] = None, response_format: str = "text", **kwargs) -> Dict[str, Any]:
     """

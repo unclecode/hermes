@@ -45,9 +45,16 @@ class PostInstallCommand(install):
         install.run(self)
         post_install()
 
+# Read version from hermes/__init__.py
+__version__ = None
+with open("hermes/__init__.py") as f:
+    for line in f:
+        if line.startswith("__version__"):
+            exec(line)
+
 setup(
     name="hermes",
-    version="0.1.0",
+    version=__version__,
     packages=find_packages(),
     install_requires=requirements,
     extras_require={

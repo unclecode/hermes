@@ -18,6 +18,21 @@ DEFAULT_CONFIG = {
         'directory': '~/.hermes/cache',
     },
     'source_type': 'auto',
+    'commentary': {
+        'provider': 'openai',
+        'model': 'gpt-4-vision-preview',
+        'api_key': None,
+    },
+    'tts': {
+        'provider': 'elevenlabs',
+        'api_key': None,
+        'voice_id': 'UDoSXdwuEuC59qu2AfUo',
+    },
+    'background_music': {
+        'default_path': None,
+        'volume': 0.2,
+        'fade_duration': 3,
+    },
 }
 
 def load_config() -> Dict[str, Any]:
@@ -32,14 +47,14 @@ def load_config() -> Dict[str, Any]:
     config = {**DEFAULT_CONFIG, **user_config}
 
     # Handle API keys
-    for service in ['llm', 'transcription']:
+    for service in ['llm', 'transcription', 'commentary', 'tts']:
         provider = config[service]['provider']
         env_var = f"{provider.upper()}_API_KEY"
-        
+
         # If API key is not in config, try to get it from environment
         if not config[service]['api_key']:
             config[service]['api_key'] = os.getenv(env_var)
-        
+
         # If still no API key, raise an error
         if not config[service]['api_key']:
             raise ValueError(f"No API key found for {provider} in config or environment variable {env_var}. "

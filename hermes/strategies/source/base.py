@@ -1,3 +1,5 @@
+# hermes/strategies/source/base.py
+
 from abc import ABC, abstractmethod
 from typing import Any
 
@@ -9,6 +11,16 @@ class SourceStrategy(ABC):
 
         :param source: The source identifier (e.g., file path, URL)
         :return: Audio data as bytes in MP3 format
+        """
+        pass
+
+    @abstractmethod
+    def get_video(self, source: str) -> bytes:
+        """
+        Retrieve video data from the given source.
+
+        :param source: The source identifier (e.g., file path, URL)
+        :return: Video data as bytes in MP4 format
         """
         pass
 

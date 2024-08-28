@@ -1,3 +1,5 @@
+# hermes/strategies/source/auto.py
+
 from urllib.parse import urlparse
 from .base import SourceStrategy
 from .file import FileSourceStrategy
@@ -12,6 +14,14 @@ class AutoSourceStrategy(SourceStrategy):
             return WebSourceStrategy().get_audio(source)
         else:
             return FileSourceStrategy().get_audio(source)
+
+    def get_video(self, source: str) -> bytes:
+        if self.is_youtube_url(source):
+            return YouTubeSourceStrategy().get_video(source)
+        elif self.is_web_url(source):
+            return WebSourceStrategy().get_video(source)
+        else:
+            return FileSourceStrategy().get_video(source)
 
     @staticmethod
     def is_youtube_url(url: str) -> bool:
