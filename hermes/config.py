@@ -20,7 +20,7 @@ DEFAULT_CONFIG = {
     'source_type': 'auto',
     'commentary': {
         'provider': 'openai',
-        'model': 'gpt-4-vision-preview',
+        'model': 'gpt-4o-mini',
         'api_key': None,
     },
     'tts': {
@@ -57,8 +57,8 @@ def load_config() -> Dict[str, Any]:
 
         # If still no API key, raise an error
         if not config[service]['api_key']:
-            raise ValueError(f"No API key found for {provider} in config or environment variable {env_var}. "
-                             f"Please set it in your config file or as an environment variable.")
+            print(f"Warning: No API key found for {provider} in config or environment variable {env_var}. To use {service}, you need an API key. I"
+                             f"Please set it in your config file or as an environment variable. You may edit ~/.hermes/config.yml to change the provider or model.")
 
     # Expand user directory for cache
     config['cache']['directory'] = os.path.expanduser(config['cache']['directory'])
