@@ -1,8 +1,7 @@
 import os
 import requests
 import tempfile
-from elevenlabs import VoiceSettings
-from elevenlabs.client import ElevenLabs
+import importlib
 
 class TTSSettings:
     def __init__(self, provider='openai', voice_id='alloy', stability=0.0, similarity_boost=1.0, style=0.0, use_speaker_boost=True):
@@ -19,11 +18,6 @@ class TextToSpeech:
         self.openai_client = None
         self.elevenlabs_client = None
 
-        if self.settings.provider == 'openai':
-            self.openai_client = requests.Session()
-        elif self.settings.provider == 'elevenlabs':
-            self.elevenlabs_client = ElevenLabs(api_key=os.environ.get("ELEVENLABS_API_KEY"))
-
     def generate_audio(self, text):
         if self.settings.provider == 'openai':
             return self._generate_audio_openai(text)
@@ -33,6 +27,9 @@ class TextToSpeech:
             raise ValueError("Unsupported TTS provider")
 
     def _generate_audio_openai(self, text):
+        if not self.openai_client:
+            self.openai_client = requests.Session()
+        
         response = self.openai_client.post(
             "https://api.openai.com/v1/audio/speech",
             headers={"Authorization": f"Bearer {os.environ.get('OPENAI_API_KEY')}"},
@@ -41,6 +38,20 @@ class TextToSpeech:
         return response.content
 
     def _generate_audio_elevenlabs(self, text):
+        if not self.elevenlabs_client:
+            try:
+                elevenlabs = importlib.import_module('elevenlabs')
+                VoiceSettings = elevenlabs.VoiceSettings
+                ElevenLabs = elevenlabs.client.ElevenLabs
+            except ImportError:
+                raise ImportError(
+                    "The ElevenLabs library is not installed. "
+                    "Please install it using the following command:\n"
+                    "pip install elevenlabs"
+                )
+
+            self.elevenlabs_client = ElevenLabs(api_key=os.environ.get("ELEVENLABS_API_KEY"))
+
         response = self.elevenlabs_client.text_to_speech.convert(
             voice_id=self.settings.voice_id,
             output_format="mp3_22050_32",
