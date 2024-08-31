@@ -65,7 +65,7 @@ print(f"Textual Commentary: {result['textual_commentary'][:100]}...\n")
 
 # Example 9: Generate textual commentary with LLM processing
 print("Example 9: Generate textual commentary for a YouTube video with LLM processing")
-result = hermes.generate_textual_commentary(
+result = generate_textual_commentary(
     'examples/assets/input_football.mp4',
     force = True, 
     llm_prompt='Make a short story out of this commentary'

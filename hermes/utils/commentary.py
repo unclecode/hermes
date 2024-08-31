@@ -10,6 +10,8 @@ import os
 from moviepy.editor import VideoFileClip, AudioFileClip, CompositeAudioClip, CompositeVideoClip, TextClip
 from moviepy.video.tools.subtitles import SubtitlesClip
 from pydub import AudioSegment
+from PIL import Image
+import numpy as np
 from ..config import CONFIG
 
 def extract_frames(video_path, interval_type='frames', interval_value=60):
@@ -223,6 +225,11 @@ def calculate_new_dimensions(video, output_size):
         raise ValueError("Invalid output_size. Provide either (width, height) or (width,) or a single number.")
 
 
+def pil_resize(pic, newsize):
+    if isinstance(pic, np.ndarray):
+        pic = Image.fromarray(pic)
+    resized_pic = pic.resize(newsize, Image.LANCZOS)
+    return np.array(resized_pic)
 
 def combine_audio_with_video(video_path, audio_segments, comments, output_path, speed_factor=1.15, background_music=None, video_output_size=(640,), **kwargs):
     video = VideoFileClip(video_path)
@@ -235,7 +242,8 @@ def combine_audio_with_video(video_path, audio_segments, comments, output_path, 
     # Resize video if output_size is specified
     if video_output_size:
         new_size = calculate_new_dimensions(video, video_output_size)
-        video = video.resize(newsize=new_size)
+        # video = video.resize(newsize=new_size)
+        video = video.fl_image(lambda pic: pil_resize(pic, new_size))
 
     with tempfile.TemporaryDirectory() as temp_dir:
         first_timestamp = audio_segments[0][0]
