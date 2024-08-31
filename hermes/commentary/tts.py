@@ -26,16 +26,24 @@ class TextToSpeech:
         else:
             raise ValueError("Unsupported TTS provider")
 
-    def _generate_audio_openai(self, text):
+    def _generate_audio_openai(self, text) -> str:
         if not self.openai_client:
             self.openai_client = requests.Session()
         
         response = self.openai_client.post(
             "https://api.openai.com/v1/audio/speech",
             headers={"Authorization": f"Bearer {os.environ.get('OPENAI_API_KEY')}"},
-            json={"model": "tts-1", "input": text, "voice": self.settings.voice_id},
+            json={"model": "tts-1", "input": text, "voice": self.settings.voice_id, "response_format": "mp3", "speed": 1.1}
         )
-        return response.content
+        
+        # Create a temporary file to store the audio
+        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
+        temp_file.write(response.content)
+        temp_file.close()
+        
+        return temp_file.name
+        
+        
 
     def _generate_audio_elevenlabs(self, text):
         if not self.elevenlabs_client:

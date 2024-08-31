@@ -121,7 +121,7 @@ print(result['transcription'])
 2. Transcribe a YouTube video:
 
 ```python
-result = transcribe('https://www.youtube.com/watch?v=v=PNulbFECY-I', provider='groq')
+result = transcribe('https://www.youtube.com/watch?v=PNulbFECY-I', provider='groq')
 print(result['transcription'])
 ```
 

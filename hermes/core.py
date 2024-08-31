@@ -93,7 +93,7 @@ class Hermes:
             temp_video_file.write(video_data)
             temp_video_path = temp_video_file.name
 
-        result = commentary.render(
+        result = commentary.generate_audio_commentary(
             video_path=temp_video_path,
             background_music=bg_music,
             tts_settings=tts_settings,
@@ -110,7 +110,14 @@ class Hermes:
         self.cache.set(cache_key, final_result)
         return final_result
 
-    def generate_textual_commentary(self, source: str, force: bool = False, llm_prompt: Optional[str] = None, **kwargs) -> Dict[str, Any]:
+    def generate_textual_commentary(self, 
+                                    source: str, 
+                                    video_topic: str = 'general',
+                                    commentary_type: str = 'detailed',
+                                    transcription : str = None,
+                                    force: bool = False, 
+                                    llm_prompt: Optional[str] = None, 
+                                    **kwargs) -> Dict[str, Any]:
         cache_key = f"textual_commentary_{self.source_strategy.__class__.__name__}_{source.replace('/', '_')}"
 
         if not force:
@@ -126,7 +133,12 @@ class Hermes:
             temp_video_file.write(video_data)
             temp_video_path = temp_video_file.name
 
-        textual_commentary = commentary.generate_textual_commentary(video_path=temp_video_path, **kwargs)
+        textual_commentary = commentary.generate_textual_commentary(
+            video_path=temp_video_path,
+            video_topic=video_topic,
+            commentary_type=commentary_type,
+            transcription = transcription,
+            **kwargs)
 
         os.unlink(temp_video_path)  # Remove the temporary video file
 
@@ -186,11 +198,12 @@ def generate_video_commentary(source: str, force: bool = False, bg_music_path: O
     return hermes.generate_video_commentary(source, force=force, bg_music_path=bg_music_path, **kwargs)
 
 
-def generate_textual_commentary(source: str, force: bool = False, llm_prompt: Optional[str] = None, **kwargs) -> Dict[str, Any]:
+def generate_textual_commentary(source: str, transcription : str = None, force: bool = False, llm_prompt: Optional[str] = None, **kwargs) -> Dict[str, Any]:
     """
     Convenience function to generate textual commentary.
 
     :param source: The source of the video (file path, URL, etc.)
+    :param transcription: The transcription of the video
     :param force: If True, ignore cache and force new commentary generation
     :param llm_prompt: If provided, process the textual commentary with this prompt using an LLM
     :param kwargs: Additional arguments for the commentary generation
@@ -201,4 +214,5 @@ def generate_textual_commentary(source: str, force: bool = False, llm_prompt: Op
         'source_type': 'auto',
     }
     hermes = Hermes.from_config(config)
-    return hermes.generate_textual_commentary(source, force=force, llm_prompt=llm_prompt, **kwargs)
+    
+    return hermes.generate_textual_commentary(source, transcription = transcription, force=force, llm_prompt=llm_prompt, **kwargs)

@@ -30,4 +30,10 @@ python -m hermes.cli examples/assets/input.mp4 -p groq --llm_prompt "Summarize t
 echo -e "\nExample 6: Forced transcription (bypassing cache)"
 python -m hermes.cli examples/assets/input.mp4 -p groq -f
 
+# Example 7: Generate Video/Audio commentary
+python -m hermes.cli input_football.mp4 --generate-commentary --interval-type total_snapshots --snapshot-count 8
+
+# Example 8: Generate Textual commentary
+python -m hermes.cli input_football.mp4 --textual-commentary --interval-type seconds --interval-value 10 --llm_prompt "Summarize the video content"
+
 echo -e "\nAll examples completed successfully!"

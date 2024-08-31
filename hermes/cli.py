@@ -16,6 +16,7 @@ def parse_args(args: List[str]) -> argparse.Namespace:
     parser.add_argument("--textual-commentary", action="store_true", help="Generate textual commentary")
     parser.add_argument("--interval-type", choices=["frames", "seconds", "total_snapshots"], default="frames", help="Interval type for frame extraction")
     parser.add_argument("--interval-value", type=int, default=60, help="Interval value for frame extraction")
+    parser.add_argument("--snapshot-count", type=int, default=10, help="Number of snapshots to extract")
     parser.add_argument("--target-size", type=int, help="Target size for frame resizing")
     parser.add_argument("--video-output-size", type=int, nargs='+', help="Output video size (width height)")
     parser.add_argument("--bg-music-path", help="Path to background music file")

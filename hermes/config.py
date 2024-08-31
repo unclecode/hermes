@@ -24,10 +24,15 @@ DEFAULT_CONFIG = {
         'api_key': None,
     },
     'tts': {
-        'provider': 'elevenlabs',
+        'provider': 'openai',
         'api_key': None,
-        'voice_id': 'UDoSXdwuEuC59qu2AfUo',
+        'voice_id': 'alloy',
     },
+    # 'tts': {
+    #     'provider': 'elevenlabs',
+    #     'api_key': None,
+    #     'voice_id': 'UDoSXdwuEuC59qu2AfUo',
+    # },
     'background_music': {
         'default_path': None,
         'volume': 0.2,

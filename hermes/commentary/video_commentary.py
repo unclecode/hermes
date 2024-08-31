@@ -1,5 +1,4 @@
 from pathlib import Path
-from moviepy.editor import VideoFileClip
 import pickle
 import json
 from ..utils.commentary import (
@@ -7,6 +6,22 @@ from ..utils.commentary import (
     create_audio_segments, combine_audio_with_video, save_commentary, extract_frames_fast
 )
 from .tts import TextToSpeech, TTSSettings
+import logging
+
+# Set up logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+# Create console handler and set level to INFO
+ch = logging.StreamHandler()
+ch.setLevel(logging.INFO)
+# Create formatter
+# formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter('%(levelname)s - %(message)s')
+# Add formatter to ch
+ch.setFormatter(formatter)
+# Add ch to logger
+logger.addHandler(ch)
 
 class VideoCommentary:
     def __init__(self, base_folder='commentaries'):
@@ -21,7 +36,8 @@ class VideoCommentary:
         self.project_folder = self.base_folder / self.video_name
         self.project_folder.mkdir(parents=True, exist_ok=True)
 
-    def render(self, 
+
+    def generate_audio_commentary(self, 
                video_path, 
                interval_type='frames', 
                interval_value=60, 
@@ -33,24 +49,32 @@ class VideoCommentary:
                tts_settings=None,
                **kwargs
                ):
+        logger.info(f"Starting audio commentary generation for {video_path}")
         self.set_video(video_path)
+        
+        logger.info("Extracting frames")
         frames, timestamps, video_duration = extract_frames_fast(
             video_path, 
             interval_type, 
             interval_value,
+            alwayse_include_last_fame=kwargs.get('alwayse_include_last_fame', True),
             **kwargs
         )
+        logger.info(f"Frames extracted. Video duration: {video_duration}")
 
-        # with VideoFileClip(video_path) as video:
-        #     video_duration = video.duration
-
+        logger.info("Generating timed commentary")
         self.comments = generate_timed_commentary(frames, timestamps, video_duration, video_topic, commentary_type)
+        logger.info("Timed commentary generated")
+
+        logger.info("Creating audio segments")
         tts = TextToSpeech(tts_settings) if tts_settings else TextToSpeech(TTSSettings())
         self.audio_segments = create_audio_segments(self.comments, tts)
+        logger.info("Audio segments created")
 
         if output_path is None:
             output_path = self.project_folder / f"{self.video_name}_with_commentary.mp4"
 
+        logger.info("Combining audio with video")
         combine_audio_with_video(
             video_path, 
             self.audio_segments, 
@@ -61,16 +85,34 @@ class VideoCommentary:
             **kwargs
         )
         self.final_video_path = output_path
+        logger.info(f"Final video created at {self.final_video_path}")
 
         return {
             "comments": self.comments,
             "final_video_path": str(self.final_video_path)
         }
 
-    def generate_textual_commentary(self, video_path, interval_type='frames', interval_value=60, video_topic='general', commentary_type='detailed', transcription=None):
+    def generate_textual_commentary(self, 
+                                    video_path : str,
+                                    video_topic :  str = 'general', 
+                                    commentary_type : str ='detailed', 
+                                    transcription: str = None, 
+                                    **kwargs
+                                    ):
+        logger.info(f"Starting textual commentary generation for {video_path}")
         self.set_video(video_path)
-        frames, _ = extract_frames(video_path, interval_type, interval_value)
-        self.comments = generate_untimed_commentary(frames, video_topic, commentary_type, transcription)
+        
+        logger.info("Extracting frames")
+        frames, timestamps, video_duration = extract_frames_fast(
+            video_path, 
+            **kwargs
+        )
+        logger.info(f"Frames extracted. Video duration: {video_duration}")
+
+        logger.info("Generating untimed commentary")
+        self.comments = generate_untimed_commentary(frames, video_topic, commentary_type, transcription, **kwargs)
+        logger.info("Untimed commentary generated")
+
         return self.comments
 
     def save_state(self):

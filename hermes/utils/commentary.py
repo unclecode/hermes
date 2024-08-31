@@ -1,6 +1,6 @@
 import cv2
 import base64
-import json
+import json, math
 import webvtt
 from litellm import completion
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -10,6 +10,7 @@ import os
 from moviepy.editor import VideoFileClip, AudioFileClip, CompositeAudioClip, CompositeVideoClip, TextClip
 from moviepy.video.tools.subtitles import SubtitlesClip
 from pydub import AudioSegment
+from ..config import CONFIG
 
 def extract_frames(video_path, interval_type='frames', interval_value=60):
     video = cv2.VideoCapture(video_path)
@@ -47,7 +48,8 @@ def resize_frame(frame, target_size):
         new_w = int(new_h * aspect_ratio)
     return cv2.resize(frame, (new_w, new_h), interpolation=cv2.INTER_AREA)
 
-def extract_frames_fast(video_path, interval_type='frames', interval_value=60, target_size=None, **kwargs):
+
+def extract_frames_fast(video_path, interval_type='seconds', interval_value=6, snapshot_count = 5, target_size=320, alwayse_include_last_frame = True, **kwargs):
     video = cv2.VideoCapture(video_path)
     fps = video.get(cv2.CAP_PROP_FPS)
     total_frames = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -60,9 +62,9 @@ def extract_frames_fast(video_path, interval_type='frames', interval_value=60, t
     elif interval_type == 'seconds':
         frame_indices = range(0, total_frames, int(fps * interval_value))
     elif interval_type == 'total_snapshots':
-        if interval_value <= 0:
-            raise ValueError("interval_value must be positive for 'total_snapshots' mode")
-        snapshot_interval = total_frames // interval_value
+        if snapshot_count <= 0:
+            raise ValueError("snapshot_count must be positive for 'total_snapshots' mode")
+        snapshot_interval = total_frames // snapshot_count
         frame_indices = range(0, total_frames, snapshot_interval)
     else:
         raise ValueError("Invalid interval_type. Choose 'frames', 'seconds', or 'total_snapshots'")
@@ -78,6 +80,15 @@ def extract_frames_fast(video_path, interval_type='frames', interval_value=60, t
         
         frames.append(process_frame(frame))
         timestamps.append(video.get(cv2.CAP_PROP_POS_MSEC) / 1000)
+        
+    if alwayse_include_last_frame and frame_index != total_frames - 1:
+        video.set(cv2.CAP_PROP_POS_FRAMES, total_frames - 1)
+        success, frame = video.read()
+        if success:
+            if target_size:
+                frame = resize_frame(frame, target_size)
+            frames.append(process_frame(frame))
+            timestamps.append(video.get(cv2.CAP_PROP_POS_MSEC) / 1000)
     
     video.release()
     return frames, timestamps, total_duration
@@ -92,19 +103,35 @@ def process_frame(frame):
     _, buffer = cv2.imencode(".jpg", frame)
     return base64.b64encode(buffer).decode("utf-8")
 
-def calculate_word_counts(timestamps, video_duration):
-    avg_speaking_rate = 150
-    words_per_second = avg_speaking_rate / 60
+def estimate_word_counts(timestamps, video_duration):
+    # Constants
+    slow_speech_rate = 130  # words per minute (slower than average)
+    words_per_second = slow_speech_rate / 60
+    safety_factor = 0.9  # Further reduce to account for pauses, emphasis, etc.
+    
+    # Calculate intervals
     intervals = [timestamps[i+1] - timestamps[i] for i in range(len(timestamps)-1)]
     intervals.append(video_duration - timestamps[-1])
-    return [max(1, int(interval * words_per_second)) for interval in intervals]
+    
+    # Calculate word counts
+    word_counts = []
+    for interval in intervals:
+        # Estimate words that can fit in this interval
+        estimated_words = math.floor(interval * words_per_second * safety_factor)
+        
+        # Ensure a minimum of 1 word per interval
+        words = max(1, estimated_words)
+        
+        word_counts.append(words)
+    
+    return word_counts
 
 def generate_timed_commentary(frames, timestamps, video_duration, video_topic, commentary_type, **kwargs):
     frame_data = [{"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{frame}"}} for frame in frames]
-    word_counts = calculate_word_counts(timestamps, video_duration)
+    word_counts = estimate_word_counts(timestamps, video_duration)
     
     prompt_content = [
-        {"type": "text", "text": f"These are frames from a {video_topic} video with their corresponding timestamps in seconds. Create a {commentary_type} commentary with precise timestamps. Format each comment as 'timestamp: comment'. Ensure comments align with specific moments in the video and adhere to the specified word count for each interval. Make sure you generate same number of words as given here, no more nor less. Make sure to follow exact format of 'timestamp: comment'. Timestamp is a floating point number, and no extra new lines are allowed."},
+        {"type": "text", "text": f"These are frames from a {video_topic} video with their corresponding timestamps in seconds. Create a {commentary_type} commentary with precise timestamps. Format each comment as 'timestamp: comment'. Ensure comments align with specific moments in the video and adhere to the specified word count for each interval. **Make sure you generate same number of words as given here, no more nor less.** **Also do not choose words with more than 3 syllables.** Make sure to follow exact format of 'timestamp: comment'. Timestamp is a floating point number, and no extra new lines are allowed."},
         {"type": "text", "text": "Timestamps and word counts:"}
     ]
     
@@ -115,12 +142,17 @@ def generate_timed_commentary(frames, timestamps, video_duration, video_topic, c
     
     try:
         response = completion(
-            model="gpt-4o-mini",
+            model=CONFIG['commentary']['model'],
             messages=[{"role": "user", "content": prompt_content}],
             max_tokens=4000
         )
         
-        return response.choices[0].message.content
+        comments = response.choices[0].message.content.split('\n')
+        if kwargs.get('always_keep_last_frame', True):
+            # Merge the last comment with the previous one
+            comments[-2] = comments[-2].strip() + ' ' + comments[-1].strip().split(': ', 1)[1]
+            
+        return '\n'.join(comments[:-1])
     except Exception as e:
         print(f"Error generating commentary: {e}")
         return ""
@@ -138,7 +170,7 @@ def generate_untimed_commentary(frames, video_topic, commentary_type, transcript
     prompt_content.extend(frame_data)
     
     response = completion(
-        model="gpt-4o",
+        model=CONFIG['commentary']['model'],
         messages=[{"role": "user", "content": prompt_content}],
         max_tokens=4000
     )
@@ -190,7 +222,9 @@ def calculate_new_dimensions(video, output_size):
     else:
         raise ValueError("Invalid output_size. Provide either (width, height) or (width,) or a single number.")
 
-def combine_audio_with_video(video_path, audio_segments, comments, output_path, speed_factor=1.15, background_music=None, video_output_size=None, **kwargs):
+
+
+def combine_audio_with_video(video_path, audio_segments, comments, output_path, speed_factor=1.15, background_music=None, video_output_size=(640,), **kwargs):
     video = VideoFileClip(video_path)
     audio_clips = []
     subtitles = []
@@ -231,8 +265,21 @@ def combine_audio_with_video(video_path, audio_segments, comments, output_path, 
         final_audio = final_audio.set_duration(video.duration)
 
         # Adjust fontsize based on video size
-        fontsize = int(video.w * 24 / 1920)  # Scale fontsize based on video width
-        subtitle_clip = SubtitlesClip(subtitles, lambda txt: TextClip(txt, fontsize=fontsize, font='Arial', color='white', stroke_color='black', stroke_width=1, method='caption', size=(video.w, None)))
+       # Define a minimum font size to avoid too small text
+        min_fontsize = 18
+
+        # Adjust fontsize based on video size with a minimum threshold
+        fontsize = max(int(video.w * 24 / 1920), min_fontsize)
+
+        # Create the subtitle clip with the adjusted fontsize
+        subtitle_clip = SubtitlesClip(subtitles, lambda txt: TextClip(
+            txt,
+            fontsize=fontsize,
+            font='Arial-Black',  # Use a thicker font like 'Arial-Black'
+            color='white',
+            method='caption',  # Use caption method to handle wrapping
+            size=(video.w, None)  # Set size to the video width to handle wrapping
+        ))
         
         final_video = CompositeVideoClip([video, subtitle_clip.set_position(('center', 'bottom'))])
         final_video = final_video.set_audio(final_audio)
