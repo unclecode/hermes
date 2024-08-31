@@ -57,8 +57,7 @@ def load_config() -> Dict[str, Any]:
 
         # If still no API key, raise an error
         if not config[service]['api_key']:
-            print(f"Warning: No API key found for {provider} in config or environment variable {env_var}. To use {service}, you need an API key. I"
-                             f"Please set it in your config file or as an environment variable. You may edit ~/.hermes/config.yml to change the provider or model.")
+            print(f"No API key found for {provider}. To use {service} with {provider}, set the key in the config file or as environment variable {env_var}. If you don't intend to use this provider, you can ignore this message.")
 
     # Expand user directory for cache
     config['cache']['directory'] = os.path.expanduser(config['cache']['directory'])

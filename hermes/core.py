@@ -167,3 +167,38 @@ def transcribe(source: str, provider: Optional[str] = None, force: bool = False,
         result['llm_processed'] = hermes.process_with_llm(result['transcription'], llm_prompt)
 
     return result
+
+def generate_video_commentary(source: str, force: bool = False, bg_music_path: Optional[str] = None, **kwargs) -> Dict[str, Any]:
+    """
+    Convenience function to generate video commentary.
+
+    :param source: The source of the video (file path, URL, etc.)
+    :param force: If True, ignore cache and force new commentary generation
+    :param bg_music_path: The path to the background music file
+    :param kwargs: Additional arguments for the commentary generation
+    :return: A dictionary containing the commentary and the path to the final video
+    """
+    config = {
+        **CONFIG,
+        'source_type': 'auto',
+    }
+    hermes = Hermes.from_config(config)
+    return hermes.generate_video_commentary(source, force=force, bg_music_path=bg_music_path, **kwargs)
+
+
+def generate_textual_commentary(source: str, force: bool = False, llm_prompt: Optional[str] = None, **kwargs) -> Dict[str, Any]:
+    """
+    Convenience function to generate textual commentary.
+
+    :param source: The source of the video (file path, URL, etc.)
+    :param force: If True, ignore cache and force new commentary generation
+    :param llm_prompt: If provided, process the textual commentary with this prompt using an LLM
+    :param kwargs: Additional arguments for the commentary generation
+    :return: A dictionary containing the textual commentary and optional LLM processing result
+    """
+    config = {
+        **CONFIG,
+        'source_type': 'auto',
+    }
+    hermes = Hermes.from_config(config)
+    return hermes.generate_textual_commentary(source, force=force, llm_prompt=llm_prompt, **kwargs)
