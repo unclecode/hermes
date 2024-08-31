@@ -1,9 +1,21 @@
 import tempfile
 import subprocess
+import shutil
 from typing import Dict, Any
 from .base import ProviderStrategy
 
 class MLXProviderStrategy(ProviderStrategy):
+    def __init__(self):
+        self._check_mlx_whisper_installed()
+
+    def _check_mlx_whisper_installed(self):
+        if shutil.which("mlx_whisper") is None:
+            raise EnvironmentError(
+                "The 'mlx_whisper' command is not found. "
+                "Please install it using the following command:\n"
+                "pip install mlx-whisper"
+            )
+
     def transcribe(self, audio_data: bytes, params: Dict[str, Any] = None) -> str:
         params = params or {}
         model = params.get("model", "mlx-community/distil-whisper-large-v3")
@@ -20,9 +32,10 @@ class MLXProviderStrategy(ProviderStrategy):
             "--output-dir", output_dir,
         ]
 
-        result = subprocess.run(command, capture_output=True, text=True)
-        if result.returncode != 0:
-            raise RuntimeError(f"MLX Whisper transcription failed: {result.stderr}")
+        try:
+            result = subprocess.run(command, capture_output=True, text=True, check=True)
+        except subprocess.CalledProcessError as e:
+            raise RuntimeError(f"MLX Whisper transcription failed: {e.stderr}")
 
         # Assuming the output is in the same directory with the same name as the input file
         output_file = f"{output_dir}/{temp_audio_path.split('/')[-1]}.txt"

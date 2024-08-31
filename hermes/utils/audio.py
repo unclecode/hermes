@@ -1,7 +1,6 @@
 import os
 import tempfile
 from typing import Any
-import ffmpeg
 import yt_dlp
 import pyperclip
 import sounddevice as sd
