@@ -18,6 +18,16 @@ Hermes, the messenger of the gods, now brings you ultra-fast video transcription
 
 ## 📦 Installation
 
+#### For macOS:
+1. Install Homebrew if you haven't already:
+   ```
+   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+   ```
+2. Install PortAudio:
+   ```
+   brew install portaudio
+   ```
+
 ### Prerequisites for Colab or Ubuntu-like Systems
 
 If you're using Google Colab or a Linux system like Ubuntu, you need to install some additional dependencies first. Run the following command:
@@ -35,7 +45,7 @@ You can install Hermes directly from GitHub using pip. There are two installatio
 For most users, the standard installation without MLX support is recommended:
 
 ```
-pip install git+https://github.com/unclecode/hermes.git@main
+pip install "git+https://github.com/unclecode/hermes.git@main"
 ```
 
 This installation includes all core features but excludes MLX-specific functionality.
@@ -45,12 +55,35 @@ This installation includes all core features but excludes MLX-specific functiona
 If you're using a Mac or an MPS system and want to use MLX Whisper for local transcription, install Hermes with MLX support:
 
 ```
-pip install git+https://github.com/unclecode/hermes.git@main#egg=hermes[mlx]
+pip install "git+https://github.com/unclecode/hermes.git@main#egg=hermes[mlx]"
 ```
 
 This installation includes all core features plus MLX Whisper support for local transcription.
 
 **Note:** MLX support is currently only available for Mac or MPS systems. If you're unsure which version to install, start with the standard installation.
+
+### Troubleshooting
+
+If you encounter any issues during installation:
+
+1. Ensure you have the latest version of pip:
+   ```
+   pip install --upgrade pip
+   ```
+
+2. If you get a "No module named 'yaml'" error, install PyYAML:
+   ```
+   pip install PyYAML
+   ```
+
+3. For macOS users, if you encounter issues related to PortAudio, you may need to set some environment variables:
+   ```
+   export LDFLAGS="-L/opt/homebrew/lib"
+   export CPPFLAGS="-I/opt/homebrew/include"
+   ```
+   Then try the installation command again.
+
+If you continue to face issues, please open a GitHub issue with details about your system and the error messages you're seeing.
 
 ## ⚙️ Configuration
 
