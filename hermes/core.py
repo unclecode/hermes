@@ -31,7 +31,10 @@ class Hermes:
                 return cached_result
 
         audio_data = self.source_strategy.get_audio(source)
-        transcription = self.provider_strategy.transcribe(audio_data, params={**kwargs, **self.config['transcription']})
+        # Pass the original source through so video-native providers (e.g.
+        # TwelveLabs Pegasus) can analyze the video directly; audio-only
+        # providers simply ignore it.
+        transcription = self.provider_strategy.transcribe(audio_data, params={**kwargs, **self.config['transcription'], 'source': source})
         
         result = {
             "source": source,

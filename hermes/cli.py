@@ -6,7 +6,7 @@ from hermes.core import Hermes, transcribe
 def parse_args(args: List[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Hermes Video Transcription Tool")
     parser.add_argument("source", help="Source file, URL, or 'mic' for microphone input")
-    parser.add_argument("-p", "--provider", choices=["groq", "openai", "mlx"], default="groq", help="Transcription provider")
+    parser.add_argument("-p", "--provider", choices=["groq", "openai", "mlx", "twelvelabs"], default="groq", help="Transcription provider")
     parser.add_argument("-m", "--model", help="Model to use for transcription")
     parser.add_argument("-o", "--output", help="Output file path")
     parser.add_argument("-f", "--force", action="store_true", help="Force transcription even if cached")

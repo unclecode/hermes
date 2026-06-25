@@ -10,7 +10,8 @@ Hermes, the messenger of the gods, now brings you ultra-fast video transcription
 ## 🚀 Features
 
 - **Blazing Fast**: Transcribe a 393-second video in just 1 second with Groq's distil-whisper model!
-- **Multi-Provider Support**: Choose from Groq (default), MLX Whisper, or OpenAI for transcription
+- **Multi-Provider Support**: Choose from Groq (default), MLX Whisper, OpenAI, or TwelveLabs Pegasus for transcription
+- **Video-Native Understanding**: TwelveLabs Pegasus reads the *video* itself (not just the audio track), using on-screen text and visual context to sharpen the transcript
 - **YouTube Support**: Easily transcribe YouTube videos by simply passing the URL
 - **Flexible**: Support for various models and output formats
 - **Python Library & CLI**: Use Hermes in your Python projects or directly from the command line
@@ -82,7 +83,36 @@ source_type: auto
 
 The configuration file is located at `~/.hermes/config.yml`. You can edit this file to change providers, models, API keys, and other settings.
 
-**Note:** If you don't specify API keys in the config file, Hermes will look for them in your environment variables. For example, it will look for `GROQ_API_KEY` if you're using Groq as a provider.
+**Note:** If you don't specify API keys in the config file, Hermes will look for them in your environment variables. For example, it will look for `GROQ_API_KEY` if you're using Groq as a provider, or `TWELVELABS_API_KEY` for TwelveLabs.
+
+### Using TwelveLabs Pegasus
+
+[TwelveLabs](https://twelvelabs.io) Pegasus is a video-understanding model. Unlike the Whisper-based providers, it analyzes the video directly, so it can lean on visual context and on-screen text when producing a transcript.
+
+The provider is optional. Install it with:
+
+```
+pip install "git+https://github.com/unclecode/hermes.git@main#egg=hermes[twelvelabs]"
+```
+
+Set your API key (a free key is available at [twelvelabs.io](https://twelvelabs.io)):
+
+```
+export TWELVELABS_API_KEY=your_key_here
+```
+
+Then select the provider:
+
+```python
+result = transcribe('path/to/your/video.mp4', provider='twelvelabs')
+print(result['transcription'])
+```
+
+```
+hermes path/to/your/video.mp4 -p twelvelabs
+```
+
+Public video URLs are analyzed in place; local files (and YouTube/microphone sources) are uploaded to TwelveLabs as an asset before analysis. You can override the model (default `pegasus1.5`) with `-m`/`model=`.
 
 To override the configuration temporarily, you can also use command-line arguments when running Hermes. These will take precedence over the settings in the config file.
 
@@ -203,4 +233,4 @@ Huge shoutout to the @GroqInc team for their incredible distil-whisper model, ma
 
 ## 🎉 Final Thoughts
 
-We're living in amazing times! Whether you need the lightning speed of Groq, the convenience of OpenAI, or the local power of MLX Whisper, Hermes has got you covered. Happy transcribing!
+We're living in amazing times! Whether you need the lightning speed of Groq, the convenience of OpenAI, the local power of MLX Whisper, or the video-native understanding of TwelveLabs Pegasus, Hermes has got you covered. Happy transcribing!

@@ -17,5 +17,8 @@ class ProviderStrategy(ABC):
         elif provider_type == 'mlx':
             from .mlx import MLXProviderStrategy
             return MLXProviderStrategy()
+        elif provider_type == 'twelvelabs':
+            from .twelvelabs import TwelveLabsProviderStrategy
+            return TwelveLabsProviderStrategy()
         else:
             raise ValueError(f"Unknown provider type: {provider_type}")

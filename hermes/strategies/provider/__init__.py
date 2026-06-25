@@ -10,5 +10,8 @@ def get_provider_strategy(provider_name: str) -> ProviderStrategy:
     elif provider_name == 'mlx':
         from .mlx import MLXProviderStrategy
         return MLXProviderStrategy()
+    elif provider_name == 'twelvelabs':
+        from .twelvelabs import TwelveLabsProviderStrategy
+        return TwelveLabsProviderStrategy()
     else:
         raise ValueError(f"Unknown provider: {provider_name}")
