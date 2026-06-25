@@ -6,10 +6,16 @@ from pathlib import Path
 
 # Read requirements.txt
 with open("requirements.txt") as f:
-    requirements = [req for req in f.read().splitlines() if not req.startswith('mlx-')]
+    requirements = [
+        req for req in f.read().splitlines()
+        if not req.startswith('mlx-') and not req.startswith('twelvelabs')
+    ]
 
 # MLX-specific requirements
 mlx_requirements = ["mlx-whisper>=0.3.0"]
+
+# TwelveLabs (Pegasus) provider requirements
+twelvelabs_requirements = ["twelvelabs>=1.2.8"]
 
 # Define the default configuration
 DEFAULT_CONFIG = {
@@ -52,6 +58,7 @@ setup(
     install_requires=requirements,
     extras_require={
         "mlx": mlx_requirements,
+        "twelvelabs": twelvelabs_requirements,
     },
     entry_points={
         "console_scripts": [
