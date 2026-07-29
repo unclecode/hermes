@@ -1,13 +1,19 @@
 import os
 import tempfile
-from typing import Any
-import ffmpeg
+from typing import Any, Optional
+
+import ffmpeg  # noqa: F401  # used by callers / environment probe
 import yt_dlp
 import pyperclip
-import sounddevice as sd
-import numpy as np
+import numpy as np  # noqa: F401
 import requests
 from pydub import AudioSegment
+
+try:
+    import sounddevice as sd
+except ImportError:  # optional; mic path only
+    sd = None
+
 
 def load_audio_file(file_path: str) -> AudioSegment:
     """
@@ -18,6 +24,7 @@ def load_audio_file(file_path: str) -> AudioSegment:
     """
     return AudioSegment.from_file(file_path)
 
+
 def download_youtube_audio(url: str) -> AudioSegment:
     """
     Download audio from a YouTube video.
@@ -26,13 +33,15 @@ def download_youtube_audio(url: str) -> AudioSegment:
     :return: AudioSegment object
     """
     ydl_opts = {
-        'format': 'bestaudio/best',
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-            'preferredquality': '192',
-        }],
-        'outtmpl': '%(id)s.%(ext)s',
+        "format": "bestaudio/best",
+        "postprocessors": [
+            {
+                "key": "FFmpegExtractAudio",
+                "preferredcodec": "mp3",
+                "preferredquality": "192",
+            }
+        ],
+        "outtmpl": "%(id)s.%(ext)s",
     }
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -43,6 +52,7 @@ def download_youtube_audio(url: str) -> AudioSegment:
     os.remove(filename)
     return audio
 
+
 def record_audio(duration: int = 10, sample_rate: int = 44100) -> AudioSegment:
     """
     Record audio from the microphone.
@@ -51,19 +61,24 @@ def record_audio(duration: int = 10, sample_rate: int = 44100) -> AudioSegment:
     :param sample_rate: Sample rate for recording
     :return: AudioSegment object
     """
+    if sd is None:
+        raise ImportError(
+            "Microphone recording requires sounddevice. "
+            "Install with: pip install 'unclecode-hermes[audio]'"
+        )
     print(f"Recording for {duration} seconds...")
     recording = sd.rec(int(duration * sample_rate), samplerate=sample_rate, channels=2)
     sd.wait()
     print("Recording finished.")
 
-    # Convert numpy array to AudioSegment
     audio = AudioSegment(
         recording.tobytes(),
         frame_rate=sample_rate,
         sample_width=recording.dtype.itemsize,
-        channels=2
+        channels=2,
     )
     return audio
+
 
 def get_audio_from_clipboard() -> AudioSegment:
     """
@@ -72,10 +87,10 @@ def get_audio_from_clipboard() -> AudioSegment:
     :return: AudioSegment object
     """
     clipboard_content = pyperclip.paste()
-    if clipboard_content.startswith(('http://', 'https://')):
+    if clipboard_content.startswith(("http://", "https://")):
         return download_web_audio(clipboard_content)
-    else:
-        raise ValueError("No valid audio URL found in clipboard")
+    raise ValueError("No valid audio URL found in clipboard")
+
 
 def download_web_audio(url: str) -> AudioSegment:
     """
@@ -87,7 +102,7 @@ def download_web_audio(url: str) -> AudioSegment:
     response = requests.get(url)
     response.raise_for_status()
 
-    with tempfile.NamedTemporaryFile(delete=False, suffix='.mp3') as temp_file:
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_file:
         temp_file.write(response.content)
         temp_file_path = temp_file.name
 
@@ -95,7 +110,8 @@ def download_web_audio(url: str) -> AudioSegment:
     os.remove(temp_file_path)
     return audio
 
-def convert_to_wav(audio: AudioSegment, sample_rate: int = 16000) -> bytes:
+
+def convert_to_wav(audio: AudioSegment, sample_rate: int = 16000) -> Optional[bytes]:
     """
     Convert AudioSegment to WAV format with specified sample rate.
 
@@ -110,6 +126,7 @@ def convert_to_wav(audio: AudioSegment, sample_rate: int = 16000) -> bytes:
     except Exception as e:
         print(f"Error converting audio to WAV: {e}")
         return None
+
 
 def get_audio_duration(audio: AudioSegment) -> float:
     """
