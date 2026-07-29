@@ -42,3 +42,18 @@ hermes0.sh
 todo.md
 create.sh
 requirements1.txt
+
+# Python / packaging
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.eggs/
+*.egg
+
+# Local env
+.env
+.env.*
